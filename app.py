@@ -3,53 +3,57 @@ import time
 import random
 
 # 1. Setup the Page
-st.set_page_config(page_title="The Aura Scanner", page_icon="📸", layout="centered")
+st.set_page_config(page_title="Cinematic Vibe Check", page_icon="✨", layout="centered")
 
-# 2. The Aura Database (80% compliment, 20% roast)
-auras = [
+# 2. The Positive Aesthetic Database
+# 100% compliments, zero roasts. Fun, cool, and confident.
+aesthetics = [
     {
-        "title": "☕ The Ruthless CEO", 
-        "desc": "Your facial geometry screams 'I drink iced coffee in the middle of winter and fire people for fun.' High boss energy, but definitely a menace to society."
+        "title": "🎬 The K-Drama Lead", 
+        "desc": "Main character energy activated. You look like the protagonist who is about to inherit a massive company or completely change someone's life. 10/10 screen presence."
     },
     {
-        "title": "🎬 The K-Drama Villain", 
-        "desc": "The algorithm detects high levels of 'I am secretly right about everything.' You look like the character who shows up in episode 4 to ruin the main couple's lives, and we love it."
+        "title": "🌃 The Berlin Local", 
+        "desc": "Effortlessly cool. You look like you know the password to every secret cafe in the city and always have the best music playlist. Elite street-style energy."
     },
     {
-        "title": "🎮 The Carried Gamer", 
-        "desc": "Scanning indicates you probably complain about lag while someone else carries the squad. But the lighting in this picture is good, so we'll let it slide."
+        "title": "🎥 The Movie Trailer Protagonist", 
+        "desc": "The lighting and the vibe are flawless. The algorithm is genuinely confused if this is a live selfie or a screenshot from an upcoming movie."
     },
     {
-        "title": "🌙 The Sleepy Prodigy", 
-        "desc": "You look like you need 14 hours of sleep and an iced matcha, but you could still outsmart everyone in the room. High IQ, low energy."
+        "title": "👑 The 'Undefeated' Vibe", 
+        "desc": "High confidence, incredibly good energy. You look like someone who wins every argument and looks absolutely flawless while doing it."
+    },
+    {
+        "title": "☕ The Cozy Aesthetic", 
+        "desc": "Warm, peaceful, and super aesthetic. You give off the exact vibe of sitting in a quiet coffee shop while it's raining outside. Flawless energy."
     }
 ]
 
 # 3. The UI
-st.title("📸 The Aura Scanner")
-st.write("My computer vision model doesn't just see faces; it reads energy. Take a selfie right now and let the algorithm diagnose your vibe.")
+st.title("✨ Cinematic Vibe Check")
+st.write("My visual algorithm analyzes lighting, angles, and energy to tell you what your cinematic aesthetic is today. Let's see your vibe.")
 st.divider()
 
 # 4. The Camera Input
-picture = st.camera_input("Take a selfie for analysis:")
+picture = st.camera_input("Take a selfie for the algorithm:")
 
 # 5. The Fake AI Processing Engine
 if picture:
     st.image(picture, caption="Target Acquired. Initiating scan...", use_container_width=True)
     
-    # Fake technical loading bar
-    my_bar = st.progress(0, text="Initializing facial recognition...")
+    # Fake technical loading bar (Builds anticipation)
+    my_bar = st.progress(0, text="Analyzing facial geometry and lighting...")
     time.sleep(1)
-    my_bar.progress(30, text="Analyzing main character energy...")
+    my_bar.progress(40, text="Calculating aesthetic energy levels...")
     time.sleep(1.5)
-    my_bar.progress(60, text="Detecting traces of PUBG rage...")
-    time.sleep(1.5)
-    my_bar.progress(90, text="Finalizing aesthetic matrix...")
+    my_bar.progress(80, text="Matching with cinematic profiles...")
     time.sleep(1)
     my_bar.empty()
     
     # The Result
-    result = random.choice(auras)
+    result = random.choice(aesthetics)
+    st.balloons()
     st.success("✅ Scan Complete.")
     st.header(result["title"])
     st.info(result["desc"])
