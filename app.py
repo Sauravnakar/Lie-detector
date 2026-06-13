@@ -1,85 +1,124 @@
 import streamlit as st
-import random
+import time
 
 # 1. Setup the Page
-st.set_page_config(page_title="Vault Hacker", page_icon="🔓", layout="centered")
+st.set_page_config(page_title="Emoji Decoder", page_icon="🍿", layout="centered")
 
-# 2. Interactive Memory (The Game Engine)
-if 'secret_code' not in st.session_state:
-    # Generates a random 3-digit PIN every time she plays
-    st.session_state.secret_code = [random.randint(0, 9), random.randint(0, 9), random.randint(0, 9)]
-    st.session_state.attempts = 7
-    st.session_state.history = []
+# 2. Game Memory
+if 'level' not in st.session_state:
+    st.session_state.level = 0
+    st.session_state.score = 0
     st.session_state.game_over = False
-    st.session_state.won = False
 
-# 3. The UI Header
-st.title("🔓 Crack The Boss's Vault")
-st.write("You found my secure vault. It contains a secret message, but you only have **7 attempts** to hack the 3-digit PIN before the system locks you out forever.")
+# 3. The Visual Game Database
+# Emojis mixed with her interests: K-Dramas, PUBG, and Movies
+levels = [
+    {
+        "emojis": "🪂 🔫 🍳 🐔 🍽️", 
+        "options": ["Call of Duty", "PUBG", "Fortnite", "Cooking Simulator"], 
+        "answer": "PUBG",
+        "roast": "If you got this wrong, you are officially banned from the lobby."
+    },
+    {
+        "emojis": "🦑 ☂️ 🍪 👧 🔫", 
+        "options": ["Alice in Wonderland", "Squid Game", "Money Heist", "Parasite"], 
+        "answer": "Squid Game",
+        "roast": "Red light, green light... you survived."
+    },
+    {
+        "emojis": "👨‍💼 🚁 🌪️ 🇰🇵 💔", 
+        "options": ["Crash Landing On You", "Descendants of the Sun", "Vincenzo", "Goblin"], 
+        "answer": "Crash Landing On You",
+        "roast": "The ultimate K-Drama test."
+    },
+    {
+        "emojis": "🚢 🧊 🚪 🥶 💀", 
+        "options": ["Pirates of the Caribbean", "Aquaman", "Titanic", "Jaws"], 
+        "answer": "Titanic",
+        "roast": "He definitely could have fit on that door."
+    },
+    {
+        "emojis": "🦇 👨🏻 🚗 🌃 🦇", 
+        "options": ["Dracula", "Batman", "Spider-Man", "Twilight"], 
+        "answer": "Batman",
+        "roast": "Just a rich guy with a lot of gadgets."
+    },
+    {
+        "emojis": "🧟‍♂️ 🚆 🩸 🏃‍♂️ 🇰🇷", 
+        "options": ["World War Z", "Train to Busan", "The Walking Dead", "All of Us Are Dead"], 
+        "answer": "Train to Busan",
+        "roast": "Never taking public transport in Korea again."
+    }
+]
+
+# 4. The UI Engine
+st.title("🍿 The Pop Culture Decoder")
+st.write("Let's see how fast your brain really is. Guess the Movie, Game, or K-Drama based ONLY on the emojis.")
 st.divider()
 
-# 4. The Interactive Gameplay Loop
+# 5. The Gameplay Loop
 if not st.session_state.game_over:
     
-    # Progress bar showing her remaining attempts
-    st.write(f"**Battery Life (Attempts Left): {st.session_state.attempts}**")
-    st.progress(st.session_state.attempts / 7)
+    current_level = levels[st.session_state.level]
     
-    st.write("Enter your 3-digit guess:")
-    col1, col2, col3 = st.columns(3)
-    guess1 = col1.number_input("Digit 1", min_value=0, max_value=9, step=1)
-    guess2 = col2.number_input("Digit 2", min_value=0, max_value=9, step=1)
-    guess3 = col3.number_input("Digit 3", min_value=0, max_value=9, step=1)
+    # Progress Bar
+    st.caption(f"Level {st.session_state.level + 1} of {len(levels)} | Score: {st.session_state.score}")
+    st.progress(st.session_state.level / len(levels))
     
-    if st.button("💻 Hack the System", use_container_width=True):
-        st.session_state.attempts -= 1
-        guess = [guess1, guess2, guess3]
-        feedback = []
+    # Massive Emojis
+    st.markdown(f"<h1 style='text-align: center; font-size: 70px;'>{current_level['emojis']}</h1>", unsafe_allow_html=True)
+    st.write("---")
+    
+    # Multiple Choice Buttons (Fast tapping!)
+    col1, col2 = st.columns(2)
+    
+    # Define a helper function to handle the button clicks
+    def check_answer(choice):
+        if choice == current_level["answer"]:
+            st.session_state.score += 1
+            st.toast("✅ Correct!")
+        else:
+            st.toast(f"❌ Wrong! It was {current_level['answer']}")
         
-        # The Logic: Tells her if each number is too high, too low, or correct
-        for i in range(3):
-            if guess[i] == st.session_state.secret_code[i]:
-                feedback.append("✅ Correct")
-            elif guess[i] < st.session_state.secret_code[i]:
-                feedback.append("⬆️ Higher")
-            else:
-                feedback.append("⬇️ Lower")
-                
-        # Save the guess to the history log
-        log_entry = f"**{guess1} - {guess2} - {guess3}** ➡️ | {feedback[0]} | {feedback[1]} | {feedback[2]} |"
-        st.session_state.history.insert(0, log_entry)
-        
-        # Win/Loss Conditions
-        if guess == st.session_state.secret_code:
+        # Move to next level or end game
+        if st.session_state.level < len(levels) - 1:
+            st.session_state.level += 1
+        else:
             st.session_state.game_over = True
-            st.session_state.won = True
-        elif st.session_state.attempts == 0:
-            st.session_state.game_over = True
-            st.session_state.won = False
             
-        st.rerun() # Instantly refreshes the screen
+    # The Buttons
+    with col1:
+        if st.button(current_level["options"][0], use_container_width=True):
+            check_answer(current_level["options"][0])
+            st.rerun()
+        if st.button(current_level["options"][1], use_container_width=True):
+            check_answer(current_level["options"][1])
+            st.rerun()
+            
+    with col2:
+        if st.button(current_level["options"][2], use_container_width=True):
+            check_answer(current_level["options"][2])
+            st.rerun()
+        if st.button(current_level["options"][3], use_container_width=True):
+            check_answer(current_level["options"][3])
+            st.rerun()
 
-    # Show her past guesses so she can use logic to solve it
-    if st.session_state.history:
-        st.write("---")
-        st.subheader("📜 Hacker Log")
-        for h in st.session_state.history:
-            st.write(h)
-
-# 5. The Results Screen
+# 6. The Results Screen
 else:
-    if st.session_state.won:
-        st.balloons()
-        st.success("🔓 SYSTEM BREACHED. ACCESS GRANTED.")
-        st.write("### 📩 The Secret Message:")
-        # The reward message (Validating, but arrogant)
-        st.info("Okay, I admit it... your English is actually getting better, and you are slightly smarter than the average PUBG bot. Don't let this compliment go to your head.")
+    st.balloons()
+    st.header("🎬 Director's Cut: Final Score")
+    st.markdown(f"### You scored: {st.session_state.score} / {len(levels)}")
+    
+    if st.session_state.score == len(levels):
+        st.success("Perfect score. Okay, I respect your pop culture knowledge.")
+    elif st.session_state.score > 3:
+        st.warning("Not bad, but you need to watch more movies instead of playing PUBG.")
     else:
-        st.error("🚨 ACCESS DENIED. SYSTEM LOCKED.")
-        code = st.session_state.secret_code
-        st.write(f"The PIN was: **{code[0]} - {code[1]} - {code[2]}**")
-        st.warning("You are officially terrible at being a hacker. Please stick to video games.")
+        st.error("Terrible. Absolutely terrible. We need to reset your internet router.")
         
-    if st.button("🔄 Reboot System and Try Again"):
-        del st.session_state.secret_code
+    st.divider()
+    if st.button("🔄 Play Again", use_container_width=True):
+        st.session_state.level = 0
+        st.session_state.score = 0
+        st.session_state.game_over = False
         st.rerun()
