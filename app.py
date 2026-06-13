@@ -1,124 +1,86 @@
 import streamlit as st
-import time
 
 # 1. Setup the Page
-st.set_page_config(page_title="Emoji Decoder", page_icon="🍿", layout="centered")
+st.set_page_config(page_title="Türk Daması", page_icon="♟️", layout="centered")
 
-# 2. Game Memory
-if 'level' not in st.session_state:
-    st.session_state.level = 0
-    st.session_state.score = 0
-    st.session_state.game_over = False
-
-# 3. The Visual Game Database
-# Emojis mixed with her interests: K-Dramas, PUBG, and Movies
-levels = [
-    {
-        "emojis": "🪂 🔫 🍳 🐔 🍽️", 
-        "options": ["Call of Duty", "PUBG", "Fortnite", "Cooking Simulator"], 
-        "answer": "PUBG",
-        "roast": "If you got this wrong, you are officially banned from the lobby."
-    },
-    {
-        "emojis": "🦑 ☂️ 🍪 👧 🔫", 
-        "options": ["Alice in Wonderland", "Squid Game", "Money Heist", "Parasite"], 
-        "answer": "Squid Game",
-        "roast": "Red light, green light... you survived."
-    },
-    {
-        "emojis": "👨‍💼 🚁 🌪️ 🇰🇵 💔", 
-        "options": ["Crash Landing On You", "Descendants of the Sun", "Vincenzo", "Goblin"], 
-        "answer": "Crash Landing On You",
-        "roast": "The ultimate K-Drama test."
-    },
-    {
-        "emojis": "🚢 🧊 🚪 🥶 💀", 
-        "options": ["Pirates of the Caribbean", "Aquaman", "Titanic", "Jaws"], 
-        "answer": "Titanic",
-        "roast": "He definitely could have fit on that door."
-    },
-    {
-        "emojis": "🦇 👨🏻 🚗 🌃 🦇", 
-        "options": ["Dracula", "Batman", "Spider-Man", "Twilight"], 
-        "answer": "Batman",
-        "roast": "Just a rich guy with a lot of gadgets."
-    },
-    {
-        "emojis": "🧟‍♂️ 🚆 🩸 🏃‍♂️ 🇰🇷", 
-        "options": ["World War Z", "Train to Busan", "The Walking Dead", "All of Us Are Dead"], 
-        "answer": "Train to Busan",
-        "roast": "Never taking public transport in Korea again."
+# 2. Live Multiplayer Magic (Shared Server State)
+# This creates one single board on the cloud that both of your phones connect to.
+@st.cache_resource
+def get_game_state():
+    return {
+        "board": [
+            [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+            ['B', 'B', 'B', 'B', 'B', 'B', 'B', 'B'],
+            ['B', 'B', 'B', 'B', 'B', 'B', 'B', 'B'],
+            [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+            [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+            ['W', 'W', 'W', 'W', 'W', 'W', 'W', 'W'],
+            ['W', 'W', 'W', 'W', 'W', 'W', 'W', 'W'],
+            [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ']
+        ],
+        "selected": None,
+        "turn": "W",
+        "message": "Game started. ⚪ White moves first."
     }
-]
 
-# 4. The UI Engine
-st.title("🍿 The Pop Culture Decoder")
-st.write("Let's see how fast your brain really is. Guess the Movie, Game, or K-Drama based ONLY on the emojis.")
+game = get_game_state()
+
+# 3. UI & Multiplayer Controls
+st.title("♟️ Online Türk Daması")
+st.write("I built us a private, live server. We are looking at the exact same board.")
+
+col1, col2 = st.columns([2, 1])
+with col1:
+    st.info(game["message"])
+with col2:
+    # Because it's web-based, she clicks this to see your move appear
+    if st.button("🔄 Refresh Board", use_container_width=True):
+        st.rerun()
+
 st.divider()
 
-# 5. The Gameplay Loop
-if not st.session_state.game_over:
-    
-    current_level = levels[st.session_state.level]
-    
-    # Progress Bar
-    st.caption(f"Level {st.session_state.level + 1} of {len(levels)} | Score: {st.session_state.score}")
-    st.progress(st.session_state.level / len(levels))
-    
-    # Massive Emojis
-    st.markdown(f"<h1 style='text-align: center; font-size: 70px;'>{current_level['emojis']}</h1>", unsafe_allow_html=True)
-    st.write("---")
-    
-    # Multiple Choice Buttons (Fast tapping!)
-    col1, col2 = st.columns(2)
-    
-    # Define a helper function to handle the button clicks
-    def check_answer(choice):
-        if choice == current_level["answer"]:
-            st.session_state.score += 1
-            st.toast("✅ Correct!")
-        else:
-            st.toast(f"❌ Wrong! It was {current_level['answer']}")
+# 4. The Sandbox Game Engine
+# We use a 8x8 grid of buttons.
+for r in range(8):
+    cols = st.columns(8)
+    for c in range(8):
+        piece = game["board"][r][c]
         
-        # Move to next level or end game
-        if st.session_state.level < len(levels) - 1:
-            st.session_state.level += 1
-        else:
-            st.session_state.game_over = True
+        # Determine button graphic
+        display = " "
+        if piece == 'W': display = "⚪"
+        elif piece == 'B': display = "⚫"
+        
+        # Highlight selected piece
+        if game["selected"] == (r, c):
+            display = "🎯"
             
-    # The Buttons
-    with col1:
-        if st.button(current_level["options"][0], use_container_width=True):
-            check_answer(current_level["options"][0])
-            st.rerun()
-        if st.button(current_level["options"][1], use_container_width=True):
-            check_answer(current_level["options"][1])
-            st.rerun()
-            
-    with col2:
-        if st.button(current_level["options"][2], use_container_width=True):
-            check_answer(current_level["options"][2])
-            st.rerun()
-        if st.button(current_level["options"][3], use_container_width=True):
-            check_answer(current_level["options"][3])
-            st.rerun()
+        with cols[c]:
+            if st.button(display, key=f"{r}-{c}", use_container_width=True):
+                
+                # Action 1: Select your own piece
+                if piece == game["turn"]:
+                    game["selected"] = (r, c)
+                    st.rerun()
+                    
+                # Action 2: Move the selected piece to an empty square
+                elif piece == ' ' and game["selected"] is not None:
+                    old_r, old_c = game["selected"]
+                    game["board"][r][c] = game["turn"]
+                    game["board"][old_r][old_c] = ' '
+                    game["turn"] = 'B' if game["turn"] == 'W' else 'W' # Switch turn
+                    game["selected"] = None
+                    game["message"] = f"Move played. Now it's {'⚪ White' if game['turn'] == 'W' else '⚫ Black'}'s turn."
+                    st.rerun()
+                    
+                # Action 3: Remove a captured opponent piece from the board
+                elif piece != game["turn"] and piece != ' ' and game["selected"] is None:
+                    game["board"][r][c] = ' '
+                    st.rerun()
 
-# 6. The Results Screen
-else:
-    st.balloons()
-    st.header("🎬 Director's Cut: Final Score")
-    st.markdown(f"### You scored: {st.session_state.score} / {len(levels)}")
-    
-    if st.session_state.score == len(levels):
-        st.success("Perfect score. Okay, I respect your pop culture knowledge.")
-    elif st.session_state.score > 3:
-        st.warning("Not bad, but you need to watch more movies instead of playing PUBG.")
-    else:
-        st.error("Terrible. Absolutely terrible. We need to reset your internet router.")
-        
-    st.divider()
-    if st.button("🔄 Play Again", use_container_width=True):
-        st.session_state.level = 0
-        st.session_state.score = 0
-        st.session_state.game_over = False
-        st.rerun()
+# 5. Reset Controls
+st.divider()
+if st.button("🚨 Reset Entire Board"):
+    game.clear()
+    game.update(get_game_state())
+    st.rerun()
